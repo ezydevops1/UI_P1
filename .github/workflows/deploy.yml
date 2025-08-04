@@ -1,29 +1,56 @@
 name: CD Pipeline
+
 on:
   push:
     branches: [ dev, qa, prod ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - qa
+          - prod
 
 jobs:
   deploy-dev:
-    if: github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/dev' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
     runs-on: ubuntu-latest
+    environment: dev
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Deploy to DEV
-        run: echo "🚀 Deploying to DEV environment"
+        run: |
+          echo "🚀 Deploying to DEV environment"
+          echo "✅ DEV deployment completed"
 
   deploy-qa:
-    if: github.ref == 'refs/heads/qa'
+    if: github.ref == 'refs/heads/qa' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'qa')
     runs-on: ubuntu-latest
+    environment: qa
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Deploy to QA
-        run: echo "🚀 Deploying to QA environment"
+        run: |
+          echo "🚀 Deploying to QA environment"
+          echo "✅ QA deployment completed"
 
   deploy-prod:
-    if: github.ref == 'refs/heads/prod'
+    if: github.ref == 'refs/heads/prod' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
     runs-on: ubuntu-latest
+    environment: prod
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Deploy to PROD
-        run: echo "🚀 Deploying to PROD environment"
+        run: |
+          echo "🚀 Deploying to PROD environment"
+          echo "✅ PROD deployment completed"
