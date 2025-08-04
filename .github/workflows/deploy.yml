@@ -1,0 +1,29 @@
+name: CD Pipeline
+on:
+  push:
+    branches: [ dev, qa, prod ]
+
+jobs:
+  deploy-dev:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to DEV
+        run: echo "🚀 Deploying to DEV environment"
+
+  deploy-qa:
+    if: github.ref == 'refs/heads/qa'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to QA
+        run: echo "🚀 Deploying to QA environment"
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/prod'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to PROD
+        run: echo "🚀 Deploying to PROD environment"
