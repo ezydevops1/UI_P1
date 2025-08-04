@@ -12,45 +12,37 @@ on:
         type: choice
         options:
           - dev
-          - qa
+          - qa  
           - prod
 
 jobs:
-  deploy-dev:
-    if: github.ref == 'refs/heads/dev' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+  deploy:
     runs-on: ubuntu-latest
-    environment: dev
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Deploy to DEV
+      - name: Determine Environment
+        id: env
         run: |
-          echo "🚀 Deploying to DEV environment"
-          echo "✅ DEV deployment completed"
-
-  deploy-qa:
-    if: github.ref == 'refs/heads/qa' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'qa')
-    runs-on: ubuntu-latest
-    environment: qa
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+          if [[ "${{ github.ref }}" == "refs/heads/dev" ]] || [[ "${{ github.event.inputs.environment }}" == "dev" ]]; then
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/qa" ]] || [[ "${{ github.event.inputs.environment }}" == "qa" ]]; then
+            echo "environment=qa" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/prod" ]] || [[ "${{ github.event.inputs.environment }}" == "prod" ]]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
         
-      - name: Deploy to QA
+      - name: Deploy Application
         run: |
-          echo "🚀 Deploying to QA environment"
-          echo "✅ QA deployment completed"
-
-  deploy-prod:
-    if: github.ref == 'refs/heads/prod' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
-    runs-on: ubuntu-latest
-    environment: prod
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Deploy to PROD
-        run: |
-          echo "🚀 Deploying to PROD environment"
-          echo "✅ PROD deployment completed"
+          TARGET_ENV="${{ steps.env.outputs.environment }}"
+          echo "🚀 Starting deployment to $TARGET_ENV environment"
+          echo "📦 Preparing deployment package..."
+          echo "🔧 Configuring $TARGET_ENV settings..."
+          echo "⚡ Deploying application..."
+          sleep 3
+          echo "✅ Successfully deployed to $TARGET_ENV environment"
+          echo "🌐 Application URL: https://$TARGET_ENV.example.com"
+          echo "📅 Deployment completed at: $(date)"
