@@ -36,13 +36,16 @@ jobs:
           fi
         
       - name: Deploy Application
+        env:
+          DB_CONN: ${{ secrets.DB_CONN }}
+          API_KEY: ${{ secrets.API_KEY }}
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
           TARGET_ENV="${{ steps.env.outputs.environment }}"
           echo "🚀 Starting deployment to $TARGET_ENV environment"
-          echo "📦 Preparing deployment package..."
-          echo "🔧 Configuring $TARGET_ENV settings..."
+          echo "📦 Using database: ${DB_CONN:0:20}..."
+          echo "🔑 API Key configured: ${API_KEY:0:10}..."
+          echo "☁️ Azure credentials loaded"
           echo "⚡ Deploying application..."
           sleep 3
           echo "✅ Successfully deployed to $TARGET_ENV environment"
-          echo "🌐 Application URL: https://$TARGET_ENV.example.com"
-          echo "📅 Deployment completed at: $(date)"
