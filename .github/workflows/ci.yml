@@ -22,8 +22,9 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          echo "✅ Dependencies installed"
+          echo "✅ Dependencies installed successfully"
           
       - name: Run build check
         run: |
           echo "✅ CI Pipeline completed successfully"
+          echo "Build timestamp: $(date)"
