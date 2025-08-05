@@ -1,0 +1,11 @@
+name: CD
+on:
+  push: {branches: [dev, qa, prod]}
+  workflow_dispatch:
+    inputs:
+      environment: {type: choice, options: [dev, qa, prod], default: dev}
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🚀 CD ran"
