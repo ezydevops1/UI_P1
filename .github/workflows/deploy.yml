@@ -1,4 +1,4 @@
-name: CD Pipeline
+name: CD
 on:
   push:
     branches: [dev, qa, prod]
@@ -15,71 +15,31 @@ on:
           - prod
 
 jobs:
-  deploy-dev:
-    if: github.ref == 'refs/heads/dev' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+  deploy:
     runs-on: ubuntu-latest
-    environment: dev
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
         
-      - name: Deploy to DEV
-        env:
-          DB_CONN: ${{ secrets.DB_CONN }}
-          API_KEY: ${{ secrets.API_KEY }}
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Determine environment
+        id: env
         run: |
-          echo "🚀 Starting deployment to DEV environment"
-          echo "📦 Database connection: ${DB_CONN:0:30}..."
-          echo "🔑 API Key configured: ${API_KEY:0:10}..."
-          echo "☁️  Azure credentials loaded"
-          echo "⚡ Deploying application to DEV..."
+          if [[ "${{ github.ref }}" == "refs/heads/dev" ]] || [[ "${{ github.event.inputs.environment }}" == "dev" ]]; then
+            echo "DEPLOY_ENV=dev" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/qa" ]] || [[ "${{ github.event.inputs.environment }}" == "qa" ]]; then
+            echo "DEPLOY_ENV=qa" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/prod" ]] || [[ "${{ github.event.inputs.environment }}" == "prod" ]]; then
+            echo "DEPLOY_ENV=prod" >> $GITHUB_OUTPUT
+          else
+            echo "DEPLOY_ENV=dev" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Deploy application
+        run: |
+          echo "🚀 Starting deployment to ${{ steps.env.outputs.DEPLOY_ENV }} environment"
+          echo "📦 Preparing deployment package..."
           sleep 2
-          echo "✅ Successfully deployed to DEV environment"
-          echo "🌐 DEV URL: https://dev.ezyportal.com"
-
-  deploy-qa:
-    if: github.ref == 'refs/heads/qa' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'qa')
-    runs-on: ubuntu-latest
-    environment: qa
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Deploy to QA
-        env:
-          DB_CONN: ${{ secrets.DB_CONN }}
-          API_KEY: ${{ secrets.API_KEY }}
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-        run: |
-          echo "🚀 Starting deployment to QA environment"
-          echo "📦 Database connection: ${DB_CONN:0:30}..."
-          echo "🔑 API Key configured: ${API_KEY:0:10}..."
-          echo "☁️  Azure credentials loaded"
-          echo "⚡ Deploying application to QA..."
-          sleep 3
-          echo "✅ Successfully deployed to QA environment"
-          echo "🌐 QA URL: https://qa.ezyportal.com"
-
-  deploy-prod:
-    if: github.ref == 'refs/heads/prod' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
-    runs-on: ubuntu-latest
-    environment: prod
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Deploy to PROD
-        env:
-          DB_CONN: ${{ secrets.DB_CONN }}
-          API_KEY: ${{ secrets.API_KEY }}
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-        run: |
-          echo "🚀 Starting deployment to PROD environment"
-          echo "📦 Database connection: ${DB_CONN:0:30}..."
-          echo "🔑 API Key configured: ${API_KEY:0:10}..."
-          echo "☁️  Azure credentials loaded"
-          echo "⚡ Deploying application to PROD..."
-          sleep 5
-          echo "✅ Successfully deployed to PROD environment"
-          echo "🌐 PROD URL: https://ezyportal.com"
+          echo "⚡ Deploying application..."
+          sleep 2
+          echo "✅ Successfully deployed to ${{ steps.env.outputs.DEPLOY_ENV }} environment"
+          echo "🌐 Application URL: https://${{ steps.env.outputs.DEPLOY_ENV }}.ezyportal.com"
