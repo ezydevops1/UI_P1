@@ -1,0 +1,10 @@
+name: CI
+on:
+  push:          {branches: [main]}
+  pull_request:  {branches: [main, dev, qa, prod]}
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "✅ CI ran"
