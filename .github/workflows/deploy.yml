@@ -1,51 +1,17 @@
-name: CD Pipeline
-
+name: CD
 on:
-  push:
-    branches: [ dev, qa, prod ]
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Target environment'
+        description: Target env
         required: true
-        default: 'dev'
+        default: dev
         type: choice
-        options:
-          - dev
-          - qa  
-          - prod
-
+        options: [dev, qa, prod]
+  push:
+    branches: [dev, qa, prod]
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Determine Environment
-        id: env
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/dev" ]] || [[ "${{ github.event.inputs.environment }}" == "dev" ]]; then
-            echo "environment=dev" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.ref }}" == "refs/heads/qa" ]] || [[ "${{ github.event.inputs.environment }}" == "qa" ]]; then
-            echo "environment=qa" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.ref }}" == "refs/heads/prod" ]] || [[ "${{ github.event.inputs.environment }}" == "prod" ]]; then
-            echo "environment=prod" >> $GITHUB_OUTPUT
-          else
-            echo "environment=dev" >> $GITHUB_OUTPUT
-          fi
-        
-      - name: Deploy Application
-        env:
-          DB_CONN: ${{ secrets.DB_CONN }}
-          API_KEY: ${{ secrets.API_KEY }}
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-        run: |
-          TARGET_ENV="${{ steps.env.outputs.environment }}"
-          echo "🚀 Starting deployment to $TARGET_ENV environment"
-          echo "📦 Using database: ${DB_CONN:0:20}..."
-          echo "🔑 API Key configured: ${API_KEY:0:10}..."
-          echo "☁️ Azure credentials loaded"
-          echo "⚡ Deploying application..."
-          sleep 3
-          echo "✅ Successfully deployed to $TARGET_ENV environment"
+      - run: echo '🚀 Deploy ran'
